@@ -20,7 +20,6 @@ import { app } from "../FIREBASECONFIG.js";
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-
 const userColRef = collection(db, "users");
 const greetingEl = document.getElementById("greeting");
 const logoutBtnEl = document.getElementById("logoutBtn");
@@ -152,10 +151,10 @@ const products = [
   },
   {
     id: 12,
-    name: "Pounded Yam and vegetable soup",
+    name: "Semo and vegetable soup",
     price: 15000,
-    description: "Stretchy yam dough with egusi, ogbono, or vegetable.",
-    imageUrl: "../media/Pounded yam.jpg",
+    description: "Stretchy semo with egusi, ogbono, or vegetable.",
+    imageUrl: "../media/Semo.jpg",
     category: "swallow"
   },
   
@@ -244,8 +243,6 @@ const deleteProduct = async(delId,dels)=>{
      }
      fetchCartItems()
      
-     
-
   } catch (error) {
     console.log(error);
     
@@ -409,8 +406,6 @@ document.addEventListener("click", async (e) => {
     totalAmountGlobal = totalAmount;
     latestItemsList = items;
 
-  
-    document.getElementById("checkoutItems").innerHTML = htmlItems;
     document.getElementById("checkoutTotal").innerText = `₦${totalAmount.toLocaleString()}`;
 
     const modal = new bootstrap.Modal(document.getElementById("checkoutModal"));
@@ -418,28 +413,94 @@ document.addEventListener("click", async (e) => {
   }
 });
 
+
 document.getElementById("confirmCheckoutBtn").addEventListener("click", async () => {
-  if (!latestCartSnapshot) return;
+  const fullName = document.getElementById("fullName").value.trim();
+  const phoneNumber = document.getElementById("phoneNumber").value.trim();
+  const address = document.getElementById("deliveryAddress").value.trim();
+  const paymentMethod = document.getElementById("paymentMethod").value;
 
-  await addDoc(collection(db, "users", userCurrentId, "ConfirmedOrders"), {
-    items: latestItemsList,
-    totalAmount: totalAmountGlobal,
-    createdAt: new Date().toISOString()
-  });
-
-  for (const docSnap of latestCartSnapshot.docs) {
-    await deleteDoc(doc(db, "users", userCurrentId, "Cart", docSnap.id));
+  if (!fullName || !phoneNumber || !address || !paymentMethod) {
+    alert("Please fill in all required delivery and payment details.");
+    return;
   }
 
-  const modal = bootstrap.Modal.getInstance(document.getElementById("checkoutModal"));
-  modal.hide();
+  if (!latestCartSnapshot) {
+    alert("Your cart is empty.");
+    return;
+  }
 
-  alert("Order placed successfully!");
-  await fetchCartItems();
+  try {
+    await addDoc(collection(db, "users", userCurrentId, "ConfirmedOrders"), {
+      items: latestItemsList,
+      totalAmount: totalAmountGlobal,
+      fullName,
+      phoneNumber,
+      address,
+      paymentMethod,
+      createdAt: new Date().toISOString()
+    });
+
+    for (const docSnap of latestCartSnapshot.docs) {
+      await deleteDoc(doc(db, "users", userCurrentId, "Cart", docSnap.id));
+    }
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById("checkoutModal"));
+    modal.hide();
+
+    const successModal = new bootstrap.Modal(document.getElementById("successModal"));
+    successModal.show();
+
+    await fetchCartItems();
+  } catch (error) {
+    console.error("Error confirming order:", error);
+    alert("Something went wrong. Please try again.");
+  }
+});
 
 
-  await fetchCartItems();
+const orderHistoryList = document.getElementById("orderHistoryList");
 
+
+document.getElementById("orderHistoryBtn").addEventListener("click", async () => {
+  if (!userCurrentId) return;
+
+  orderHistoryList.innerHTML = `<li class="list-group-item">Loading...</li>`;
+
+  try {
+    const ordersRef = collection(db, "users", userCurrentId, "ConfirmedOrders");
+    const ordersSnapshot = await getDocs(ordersRef);
+
+    if (ordersSnapshot.empty) {
+      orderHistoryList.innerHTML = `<li class="list-group-item text-center">No previous orders.</li>`;
+      return;
+    }
+
+  let ordersHTML = "";
+ordersSnapshot.forEach((doc) => {
+  const order = doc.data();
+  const date = new Date(order.createdAt).toLocaleString();
+
+  let itemsHTML = "";
+  order.items.forEach((item) => {
+    itemsHTML += `<div>${item.Quantity} × ${item.Name} – ₦${item.Subtotal.toLocaleString()}</div>`;
+  });
+
+ ordersHTML += `
+  <li class="list-group-item">
+    <strong>${date}</strong><br>
+    <div class="mb-2 ps-3">${itemsHTML}</div>
+    <span class="fw-bold">Total: ₦${order.totalAmount.toLocaleString()}</span>
+  </li>
+`;
+});
+
+orderHistoryList.innerHTML = ordersHTML;
+
+  } catch (error) {
+    console.error("Failed to fetch order history:", error);
+    orderHistoryList.innerHTML = `<li class="list-group-item text-danger">Error loading order history.</li>`;
+  }
 });
 
 
@@ -526,53 +587,14 @@ document.getElementById("confirmCheckoutBtn").addEventListener("click", async ()
 
 
 
-// document.addEventListener("click", async (e) => {
-//   if (e.target && e.target.id === "checkoutBtn") {
-//     const cartRef = collection(db, "users", userCurrentId, "Cart");
-//     const cartSnapshot = await getDocs(cartRef);
 
-//     if (cartSnapshot.empty) {
-//       alert("Your cart is empty!");
-//       return;
-//     }
 
-//     let items = [];
-//     let totalAmount = 0;
 
-//     cartSnapshot.forEach((docSnap) => {
-//       const data = docSnap.data();
-//       const qty = data.Quantity || 1;
-//       totalAmount += qty * data.Price;
-//       items.push({
-//         Name: data.Name,
-//         Quantity: qty,
-//         Price: data.Price,
-//         Subtotal: qty * data.Price,
-//         imageUrl: data.imageUrl
-//       });
-//     });
 
-    // Confirm checkout
-    // const confirmCheckout = confirm(
-//       `You're about to place an order of ₦${totalAmount.toLocaleString()}.\nClick OK to confirm.`
-//     );
 
-//     if (confirmCheckout) {
-//       // Save to ConfirmedOrders
-//       await addDoc(collection(db, "users", userCurrentId, "ConfirmedOrders"), {
-//         items,
-//         totalAmount,
-//         createdAt: new Date().toISOString()
-//       });
 
-//       // Clear cart
-//       for (const docSnap of cartSnapshot.docs) {
-//         await deleteDoc(doc(db, "users", userCurrentId, "Cart", docSnap.id));
-//       }
 
-//       alert("Order placed successfully!");
-//       await fetchCartItems(); 
-//     }
-//   }
-// });
+
+
+
 

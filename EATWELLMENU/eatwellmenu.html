@@ -20,7 +20,6 @@
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
       <span class="navbar-toggler-icon"></span>
     </button>
-
     <div class="collapse navbar-collapse justify-content-between" id="mainNavbar">
       <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
         <li class="nav-item">
@@ -32,8 +31,13 @@
         <li class="nav-item">
           <a class="nav-link text-warning fw-bold" href="#">Shop</a>
         </li>
+        <li class="nav-item">
+  <a class="nav-link text-warning fw-bold" id="orderHistoryBtn"  href="#" data-bs-toggle="modal" data-bs-target="#orderHistoryModal">
+   History
+  </a>
+</li>
       </ul>
-
+   
     <div class="d-flex align-items-center gap-3">
 <button id="cartIconBtn"
   type="button"
@@ -77,49 +81,65 @@
   <div class="row" id="swallowSection"></div>
 </div>
 
- <div class="container mt-4">
-  <h3 class="text-warning" id="categories" >Pastry:</h3>
-  <div class="row" id="pastrySection"></div>
-</div>
-
-
 <div class="offcanvas offcanvas-end" tabindex="-1" id="cartDrawer" aria-labelledby="cartDrawerLabel">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="cartDrawerLabel">Your Cart</h5>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
   <div class="offcanvas-body" id="cartContent">
-    <div id="cart-items"></div>
+    <div id="cart-items">
+</div>
+    </div>
   </div>
 </div>
 
-
 <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+ <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-white text-dark rounded-4">
       <div class="modal-header border-0">
-        <h5 class="modal-title fw-bold" id="checkoutModalLabel">Order Summary</h5>
+        <h5 class="modal-title fw-bold" id="checkoutModalLabel">Delivery Details & Payment</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-   
-
       <div class="modal-body">
-        <div id="checkoutItems" class="checkout-items mb-3"></div>
+        <form id="deliveryForm">
+          <div class="mb-3">
+            <label for="fullName" class="form-label fw-bold">Full Name</label>
+            <input type="text" class="form-control" id="fullName" placeholder="Enter your name" required>
+          </div>
 
-        <div class="d-flex justify-content-between border-top pt-3 fw-bold fs-5">
-          <span>Total:</span>
-          <span id="checkoutTotal">₦0.00</span>
-        </div>
+          <div class="mb-3">
+            <label for="phoneNumber" class="form-label fw-bold">Phone Number</label>
+            <input type="tel" class="form-control" id="phoneNumber"  required>
+          </div>
+
+          <div class="mb-3">
+            <label for="deliveryAddress" class="form-label fw-bold">Delivery Address</label>
+            <textarea class="form-control" id="deliveryAddress" rows="2" placeholder="Enter your full delivery address" required></textarea>
+          </div>
+
+
+       <div class="mb-3">
+  <label class="form-label">Payment Method</label>
+  <input type="text" class="form-control" id="paymentMethod" value="Card" disabled>
+</div>
+
+
+          <div class="d-flex justify-content-between border-top pt-3 fw-bold fs-5">
+            <span>Total:</span>
+            <span id="checkoutTotal">₦0.00</span>
+          </div>
+        </form>
       </div>
 
       <div class="modal-footer border-0">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" id="confirmCheckoutBtn" class="btn btn-success px-4">Place Order</button>
+        <button type="button" id="confirmCheckoutBtn" class="btn btn-success px-4">Confirm Order</button>
       </div>
     </div>
   </div>
 </div>
+
 
 <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -127,19 +147,27 @@
       <div class="modal-body">
         <h4 class="text-success mb-3">Order Placed Successfully!</h4>
         <p class="fs-5">Your delivery is on the way!</p>
-        <p class="text-muted">Estimated arrival time: <strong>30 minutes</strong></p>
-
-        <div class="van-animation mt-3">
-          <img src="../media/van-shuttle-solid (1).svg" alt="">
-        
-        </div>
-
+        <p class="text-muted">Your order will arrive in: <strong>20 minutes</strong></p>
         <button type="button" class="btn btn-success mt-4" data-bs-dismiss="modal">Okay</button>
       </div>
     </div>
   </div>
 </div>
 
+<div class="modal fade" id="orderHistoryModal" tabindex="-1" aria-labelledby="orderHistoryLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-white text-dark rounded-4">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold" id="orderHistoryLabel">Your Order History</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <ul id="orderHistoryList" class="list-group">
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 </body>
